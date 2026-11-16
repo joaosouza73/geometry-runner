@@ -1,0 +1,15 @@
+# Saída de compilação Java
+out/
+target/
+build/
+*.class
+
+# Arquivos temporários e logs
+*.log
+*.tmp
+
+# Metadados locais do sistema operacional e IDE
+.DS_Store
+Thumbs.db
+.idea/
+.settings/
