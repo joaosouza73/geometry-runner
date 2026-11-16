@@ -1,7 +1,13 @@
 package com.example.geometrydash;
 
-/** Metadados do seletor; fases futuras podem ser cadastradas sem alterar o menu. */
+/** Catálogo de disponibilidade e metadados exibidos pelo seletor de fases. */
 public final class LevelOption {
+    private static final LevelOption[] OPTIONS = {
+        new LevelOption(1, "FASE 1", "Neon Run · Disponível", true),
+        new LevelOption(2, "FASE 2", "Gravity Steps · Disponível", true),
+        new LevelOption(3, "FASE 3", "Em breve", false)
+    };
+
     private final int levelId;
     private final String title;
     private final String description;
@@ -20,10 +26,13 @@ public final class LevelOption {
     public boolean isAvailable() { return available; }
 
     public static LevelOption[] all() {
-        return new LevelOption[]{
-            new LevelOption(1, "FASE 1", "Neon Run · Disponível", true),
-            new LevelOption(2, "FASE 2", "Gravity Steps · Disponível", true),
-            new LevelOption(3, "FASE 3", "Em breve", false)
-        };
+        return OPTIONS.clone();
+    }
+
+    public static boolean isAvailable(int levelId) {
+        for (LevelOption option : OPTIONS) {
+            if (option.levelId == levelId) return option.available;
+        }
+        return false;
     }
 }

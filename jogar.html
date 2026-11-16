@@ -89,6 +89,13 @@ function handleClick(e){const r=c.getBoundingClientRect(),x=(e.clientX-r.left)*W
  if(state==='menu'){for(let i=0;i<levels.length;i++){let top=154+i*66;if(x>=64&&x<=374&&y0>=top&&y0<=top+54&&levels[i].available){levelIndex=i;return}}for(let i=0;i<skins.length;i++){let left=414+i*145;if(x>=left&&x<=left+132&&y0>=154&&y0<=240){skinIndex=i;return}}if(x>=340&&x<=560&&y0>=382&&y0<=434)start();return}
  if(state==='gameover'||state==='victory'){if(x>=238&&x<=428&&y0>=265&&y0<=313)start();else if(x>=472&&x<=662&&y0>=265&&y0<=313)goMenu();return}jumpPlayer()}
 c.addEventListener('pointerdown',handleClick);
+function rectanglesIntersect(a,b){return a.x<b.x+b.w&&a.x+a.w>b.x&&a.y<b.y+b.h&&a.y+a.h>b.y}
+function triangleIntersectsRectangle(triangle,rect){
+ const corners=[[rect.x,rect.y],[rect.x+rect.w,rect.y],[rect.x+rect.w,rect.y+rect.h],[rect.x,rect.y+rect.h]],axes=[[1,0],[0,1]];
+ for(let i=0;i<triangle.length;i++){const a=triangle[i],b=triangle[(i+1)%triangle.length],dx=b[0]-a[0],dy=b[1]-a[1];axes.push([-dy,dx])}
+ for(const axis of axes){const project=points=>points.map(p=>p[0]*axis[0]+p[1]*axis[1]),a=project(triangle),b=project(corners);if(Math.max(...a)<=Math.min(...b)||Math.max(...b)<=Math.min(...a))return false}
+ return true
+}
 function tick(now){
  const dt=Math.min((now-last)/1000||0,.05);last=now;particleSystem.update(dt);jumpAnimation.update(dt);
  if(state==='playing'){
@@ -96,8 +103,8 @@ function tick(now){
   if(!grounded){vy+=gravity*(gravityDirection===GravityDirection.DOWN?1:-1)*dt;y+=vy*dt;const hitSurface=gravityDirection===GravityDirection.DOWN?y+S>=G:y<=CEILING;if(hitSurface){y=gravityDirection===GravityDirection.DOWN?G-S:CEILING;vy=0;grounded=true;landed=true}}
   if(landed){jumpAnimation.land();const bias=gravityDirection===GravityDirection.DOWN?100:-100;particleSystem.burst(PX+S/2,gravityDirection===GravityDirection.DOWN?G:CEILING,selected(),12,60,bias)}
   for(const p of portals){if(!p.triggered&&cam>=p.x-(PX+S/2)){p.triggered=true;flipGravity(p.target)}}
-  particleSystem.trail(dt,PX-3,y+S/2,selected());const pr={x:PX+2,y:y+2,w:S-4,h:S-4};
-  for(const o of obstacles){const ox=o.x-cam;if(ox>PX+32||ox+o.w<PX)continue;let hit;if(o.type==='block'&&o.dir===GravityDirection.DOWN)hit=pr.x<ox+o.w-2&&pr.x+pr.w>ox+2&&pr.y<G+2&&pr.y+pr.h>G-o.h+2;else if(o.type==='block')hit=pr.x<ox+o.w-2&&pr.x+pr.w>ox+2&&pr.y<CEILING+o.h&&pr.y+pr.h>CEILING+2;else if(o.dir===GravityDirection.DOWN)hit=pr.x<ox+30&&pr.x+pr.w>ox+4&&pr.y+pr.h>G-o.h&&pr.y<G;else hit=pr.x<ox+30&&pr.x+pr.w>ox+4&&pr.y<CEILING+o.h&&pr.y+pr.h>CEILING;if(hit){particleSystem.burst(PX+S/2,y+S/2,selected(),34,190,190);state='gameover';break}}
+  particleSystem.trail(dt,PX-3,y+S/2,selected());const pr={x:PX+2,y:Math.trunc(y)+2,w:S-4,h:S-4};
+   for(const o of obstacles){const ox=Math.round(o.x-cam);if(ox+o.w<PX-2||ox>PX+30)continue;let hit;if(o.type==='block'){const top=(o.dir===GravityDirection.DOWN?G-o.h:CEILING)+2;hit=rectanglesIntersect(pr,{x:ox+2,y:top,w:o.w-4,h:o.h-2})}else{const base=o.dir===GravityDirection.DOWN?G:CEILING,tip=base+(o.dir===GravityDirection.DOWN?-o.h:o.h),triangle=[[ox+4,base],[ox+21,tip],[ox+38,base]];hit=triangleIntersectsRectangle(triangle,pr)}if(hit){particleSystem.burst(PX+S/2,y+S/2,selected(),34,190,190);state='gameover';break}}
   if(cam>=activeLength&&state==='playing'){state='victory';particleSystem.burst(PX+S/2,y+S/2,selected(),58,220,240)}
  }
  if(state==='menu')drawMenu();else drawGame();requestAnimationFrame(tick)

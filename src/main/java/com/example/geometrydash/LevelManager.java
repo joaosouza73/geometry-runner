@@ -6,7 +6,7 @@ public final class LevelManager {
     private int selectedLevelId = 1;
 
     public void selectLevel(int levelId) {
-        if (levelId != 1 && levelId != 2) throw new IllegalArgumentException("Fase indisponível: " + levelId);
+        if (!LevelOption.isAvailable(levelId)) throw new IllegalArgumentException("Fase indisponível: " + levelId);
         selectedLevelId = levelId;
     }
 

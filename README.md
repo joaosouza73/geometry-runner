@@ -8,6 +8,7 @@ O projeto demonstra o uso de Java e Programação Orientada a Objetos em um jogo
 
 - Menu principal com seleção de fase e prévia das aparências.
 - Três aparências selecionáveis: Classic Blue, Fire Red e Neon Green.
+- Fases 1 e 2 disponíveis; a Fase 3 aparece bloqueada no seletor.
 - Fase 1 com mapa fixo, dificuldade progressiva e duração aproximada de 24 segundos.
 - Fase 2, com duração aproximada de 42 segundos, mais obstáculos e dificuldade maior.
 - Sequência de oito blocos em escada na Fase 2.
@@ -24,11 +25,12 @@ O projeto demonstra o uso de Java e Programação Orientada a Objetos em um jogo
 - Java Swing e AWT para janela, entrada e desenho 2D.
 - HTML5 Canvas e JavaScript na versão alternativa de navegador `jogar.html`.
 - Nenhuma biblioteca externa é necessária para a versão Java.
+- A versão de navegador mantém sua própria implementação JavaScript; alterações em fases e colisões devem ser mantidas em sincronia com o Java.
 
 ## Estrutura do projeto
 
 ```text
-geometry-dash-java/
+.
 ├── src/main/java/com/example/geometrydash/
 │   ├── Main.java
 │   ├── Game.java, GamePanel.java, GameView.java
@@ -39,6 +41,7 @@ geometry-dash-java/
 │   ├── GravityDirection.java, GravityPortal.java
 │   ├── Obstacle.java, Spike.java, Block.java
 │   ├── CollisionDetector.java, GameState.java
+├── src/test/java/com/example/geometrydash/GameModelChecks.java
 ├── jogar.html
 ├── .gitignore
 └── README.md
@@ -83,7 +86,7 @@ As transformações da animação não alteram a hitbox. As partículas também 
 
 ### Visual Studio Code
 
-1. Abra a pasta `geometry-dash-java` no Visual Studio Code.
+1. Abra no Visual Studio Code a pasta do repositório, que contém `README.md` e `src/`.
 2. Aguarde a extensão Java reconhecer o projeto.
 3. Abra `src/main/java/com/example/geometrydash/Main.java`.
 4. Selecione **Run Java** acima do método `main`.
@@ -96,6 +99,20 @@ Abra o terminal na pasta `geometry-dash-java` e execute:
 javac -encoding UTF-8 -d out (Get-ChildItem -Recurse src/main/java -Filter *.java).FullName
 java -cp out com.example.geometrydash.Main
 ```
+
+### Compilar as verificações automatizadas
+
+As verificações do modelo não usam bibliotecas externas. Na raiz do repositório, compile primeiro o jogo e depois as verificações:
+
+```powershell
+$main = Get-ChildItem -Recurse src/main/java -Filter *.java
+javac -encoding UTF-8 -d out $main.FullName
+$checks = Get-ChildItem -Recurse src/test/java -Filter *.java
+javac -encoding UTF-8 -cp out -d out $checks.FullName
+java -cp out com.example.geometrydash.GameModelChecks
+```
+
+Elas verificam catálogo e seleção de fases, dados e imutabilidade dos mapas, salto, inversão de gravidade e colisões básicas.
 
 A janela do jogo mede 900 × 450 pixels. Para jogar a versão alternativa sem instalar Java, abra `jogar.html` em um navegador.
 
